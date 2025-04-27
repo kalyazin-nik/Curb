@@ -4,6 +4,7 @@
     <h3>
       <a class="button" href="/">На главную</a>
       <a class="button" href="/weather">Посмотреть погоду</a>
+      <a class="button" href="/login">Авторизоваться</a>
     </h3>
   </div>
 </template>
