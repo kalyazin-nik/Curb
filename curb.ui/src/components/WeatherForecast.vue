@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: 'WeatherForecast',
   data() {
@@ -26,13 +28,18 @@ export default {
   },
   async mounted() {
     try {
-      const response = await fetch('/api/WeatherForecast');
-      this.forecasts = await response.json();
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await axios.get('/api/WeatherForecast', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        }
+      });
+      this.forecasts = response.data;
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
     }
   }
-};
+}
 </script>
 
 <style scoped>
