@@ -1,6 +1,6 @@
 ﻿namespace Curb.API.DataAccess.Domains;
 
-public class User : BaseEntity
+internal class User : BaseEntity
 {
     public override Guid Id { get; set; }
     public long UserId { get; set; }
@@ -10,4 +10,5 @@ public class User : BaseEntity
     public string? PhotoUrl { get; set; } = null!;
     public DateTime AuthDate { get; set; }
     public DateTime CreeatedAt { get; set; }
+    public virtual Session? Session { get; set; }
 }

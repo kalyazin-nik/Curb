@@ -14,7 +14,7 @@
       script.async = true;
       script.setAttribute("data-telegram-login", "Curb_authenticate_bot");
       script.setAttribute("data-size", "large");
-      script.setAttribute("data-auth-url", "https://distinct-firm-sunbird.ngrok-free.app/auth");
+      script.setAttribute("data-auth-url", "https://indirectly-unified-cardinal.ngrok-free.app/auth");
       script.setAttribute("data-request-access", "write");
       document.getElementById("telegram-login").appendChild(script);
     }

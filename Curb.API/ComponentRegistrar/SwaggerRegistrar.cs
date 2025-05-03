@@ -1,24 +1,19 @@
-﻿using Curb.API.Controllers;
+﻿using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Curb.API.ComponentRegistrar;
 
-public static class SwaggerRegistrar
+internal static class SwaggerRegistrar
 {
     public static SwaggerGenOptions SetIncludeXmlComments(this SwaggerGenOptions options)
     {
-        var docTypeMarkers = new Type[] { typeof(WeatherForecastController), typeof(WeatherForecast) };
-        foreach (var marker in docTypeMarkers)
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
         {
-            var xmlFile = $"{marker.Assembly.GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-            if (File.Exists(xmlPath))
-            {
-                options.IncludeXmlComments(xmlPath);
-            }
+            options.IncludeXmlComments(xmlPath);
         }
 
         return options;

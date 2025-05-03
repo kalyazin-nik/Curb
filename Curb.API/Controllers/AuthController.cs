@@ -1,85 +1,82 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Net;
 using Curb.API.Contracts.Dtos;
 using Curb.API.Contracts.Interfaces;
 using Curb.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Curb.API.Controllers;
 
+/// <summary>
+/// Аутентификация
+/// </summary>
+/// <param name="authService">Сервис по работе с аутентификацией и авторизацией.</param>
+/// <param name="userService">Сервис по работе с пользователями.</param>
 [ApiController]
-[Route("api/[controller]")]
-public class AuthController(IConfiguration configuration, IUserService userRepository) : ControllerBase
+[Route("api/auth")]
+[ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+public class AuthController(IAuthService authService, IUserService userService) : ControllerBase
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly IUserService _userRepository = userRepository;
+    private readonly IAuthService _authService = authService;
+    private readonly IUserService _userService = userService;
 
+    /// <summary>
+    /// Авторизация пользователя после аутентификации через Telegram.
+    /// </summary>
+    /// <param name="userRegister">Объект регистрации пользователя Telegram.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Токен авторизации.</returns>
     [HttpGet("telegram-callback")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType(typeof(TokenDto), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> TelegramCallback([FromQuery] UserRegisterDto userRegister, CancellationToken cancellationToken)
     {
-        if (!await VerifyTelegramData(userRegister, cancellationToken))
+        if (!await _authService.VerifyTelegramData(userRegister, cancellationToken))
         {
             return Unauthorized("Ошибка проверки данных.");
         }
 
-        var user = await _userRepository.GetByUserIdAsync(long.Parse(userRegister.Id), cancellationToken);
-        if (user is not null)
+        var user = await _userService.GetByUserIdAsync(long.Parse(userRegister.Id), cancellationToken);
+        user ??= await _userService.RegisterAsync(userRegister, cancellationToken);
+        var accessToken = await _authService.GenerateAccessToken(user, cancellationToken);
+        var refreshToken = await _authService.GenerateRefreshToken(cancellationToken);
+
+        user.RefreshToken = refreshToken;
+        await _userService.UpdateAsync(user, userRegister.MapToPropertyValues(), cancellationToken);
+
+        return Ok(new TokenDto { AccessToken = accessToken, RefreshToken = refreshToken });
+    }
+
+    /// <summary>
+    /// Обновление токена доступа.
+    /// </summary>
+    /// <param name="user">Объект пользователя.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Токен авторизации.</returns>
+    [HttpPut("refresh-token")]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    [ProducesResponseType(typeof(TokenDto), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> RefreshToken([FromBody] UserDto user, CancellationToken cancellationToken)
+    {
+        if (await _authService.RefreshTokenIsValidAsync(user, cancellationToken))
         {
-            await _userRepository.UpdateAsync(user, userRegister.MapToPropertyValues(), cancellationToken);
+            var accessToken = await _authService.GenerateAccessToken(user, cancellationToken);
+            return Ok(new TokenDto { AccessToken = accessToken });
         }
-        user ??= await _userRepository.RegisterAsync(userRegister, cancellationToken);
-        var token = await GenerateToken(user, cancellationToken);
-        return Ok(new { Token = token });
+
+        return Unauthorized();
     }
 
-    private async Task<bool> VerifyTelegramData(UserRegisterDto userRegister, CancellationToken cancellationToken)
+    /// <summary>
+    /// Закрытие сессии пользователя.
+    /// </summary>
+    /// <param name="user">Объект пользователя.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Успешное выполнение закрытия сессии.</returns>
+    [HttpPost("logout")]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    public async Task<IActionResult> Logout([FromBody] UserDto user, CancellationToken cancellationToken)
     {
-        return await Task.Run(() =>
-        {
-            var builder = new StringBuilder();
-            foreach (var property in typeof(UserRegisterDto).GetProperties().OrderBy(x => x.Name))
-            {
-                if (property.Name != nameof(UserRegisterDto.Hash) && property.GetValue(userRegister) is object value)
-                {
-                    builder.Append($"{property.Name.ToStringSnakeCase()}={value}\n");
-                }
-            }
-            builder.Length--;
-            var secretKey = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(_configuration["BotConfiguration:BotToken"]!));
-            using var hmac = new HMACSHA256(secretKey);
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
-            var computedHashHex = BitConverter.ToString(computedHash).Replace("-", "").ToLower();
-
-            return computedHashHex == userRegister.Hash;
-        }, cancellationToken);
-    }
-
-    private async Task<string> GenerateToken(UserDto user, CancellationToken cancellationToken)
-    {
-        return await Task.Run(() =>
-        {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username ?? ""),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"]!,
-                audience: _configuration["Jwt:Audience"]!,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(60),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }, cancellationToken);
+        await _authService.UserLogout(user, cancellationToken);
+        return Ok();
     }
 }

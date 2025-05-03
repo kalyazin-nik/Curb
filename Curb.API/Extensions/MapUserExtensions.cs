@@ -4,7 +4,7 @@ using Curb.API.DataAccess.Domains;
 
 namespace Curb.API.Extensions;
 
-public static class MapUserExtensions
+internal static class MapUserExtensions
 {
     public static User MapToUser(this UserRegisterDto userRegister)
     {
@@ -15,8 +15,9 @@ public static class MapUserExtensions
             FirstName = userRegister.FirstName,
             LastName = userRegister.LastName,
             PhotoUrl = userRegister.PhotoUrl,
-            AuthDate = DateTime.Parse(userRegister.AuthDate!),
-            CreeatedAt = DateTime.UtcNow
+            AuthDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(userRegister.AuthDate)).UtcDateTime,
+            CreeatedAt = DateTime.UtcNow,
+            Session = new Session()
         };
     }
 
@@ -26,7 +27,8 @@ public static class MapUserExtensions
         {
             Id = user.Id,
             Username = user.Username,
-            Role = UserRole.Companion
+            RefreshToken = user.Session!.RefreshToken,
+            Role = UserRole.Companion.ToString()
         };
     }
 

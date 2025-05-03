@@ -5,6 +5,7 @@
       <a class="button" href="/">На главную</a>
       <a class="button" href="/weather">Посмотреть погоду</a>
       <a class="button" href="/login">Авторизоваться</a>
+      <a class="button" href="/logout">Выйти</a>
     </h3>
   </div>
 </template>

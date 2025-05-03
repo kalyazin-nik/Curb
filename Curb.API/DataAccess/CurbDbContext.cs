@@ -4,14 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Curb.API.DataAccess;
 
-public class CurbDbContext(DbContextOptions options) : DbContext(options)
+internal class CurbDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Session> Sessions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new SessionConfiguration());
     }
 }

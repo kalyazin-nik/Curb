@@ -8,9 +8,9 @@ using Microsoft.OpenApi.Models;
 
 namespace Curb.API;
 
-public class Program
+internal class Program
 {
-    public static void Main(string[] args)
+    internal static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,7 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Curb API", Version = "v1" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Curb API", Version = "1.0" });
             options.SetIncludeXmlComments();
             options.SetSecurityDefinition();
             options.SetSecurityRequirement();
@@ -37,6 +37,7 @@ public class Program
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero,
                     ValidIssuer = builder.Configuration["Jwt:Issuer"]!,
                     ValidAudience = builder.Configuration["Jwt:Audience"]!,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))

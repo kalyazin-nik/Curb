@@ -3,12 +3,16 @@ import TheWelcome from './components/TheWelcome.vue';
 import WeatherForecast from './components/WeatherForecast.vue';
 import Login from './components/Login.vue';
 import Auth from './components/Auth.vue';
+import AuthRefresh from './components/AuthRefresh.vue';
+import Logout from './components/Logout.vue';
 
 const routes = [
   { path: '/', component: TheWelcome },
   { path: '/weather', component: WeatherForecast, meta: { requiresAuth: true } },
   { path: '/login', component: Login },
   { path: '/auth', component: Auth },
+  { path: '/auth/refresh', component: AuthRefresh },
+  { path: '/logout', component: Logout }
 ];
 
 const router = createRouter({
@@ -17,13 +21,31 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token');
-  if (to.meta.requiresAuth && !token) {
-    localStorage.setItem('redirectPath', to.fullPath);
-    next('/login');
-  } else {
-    next();
+  let accessToken = localStorage.getItem('accessToken');
+
+  if (to.meta.requiresAuth) {
+    if (!accessToken) {
+      localStorage.setItem('redirectPath', to.fullPath);
+      return next('/login');
+    }
+
+    try {
+      const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+      const tokenExpiration = tokenPayload.exp * 1000;
+
+      if (Date.now() >= tokenExpiration) {
+        localStorage.setItem('redirectPath', to.fullPath);
+        return next('/auth/refresh');
+      }
+    } catch (error) {
+      console.error("Ошибка декодирования accessToken:", error);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      return next('/login');
+    }
   }
+
+  next();
 });
 
 export default router;

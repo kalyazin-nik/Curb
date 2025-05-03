@@ -7,70 +7,75 @@ namespace Curb.API.Contracts.Interfaces;
 /// <summary>
 /// Репозиторий.
 /// </summary>
-/// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
-/// <typeparam name="TContext">Контекст подключения к репозиторию.</typeparam>
-public interface IRepository<TEntity, TContext>
-    where TEntity : BaseEntity
-    where TContext : DbContext
+/// <typeparam name="TContext">Экземпляр класса <see cref="DbContext"/>.</typeparam>
+internal interface IRepository<TContext> where TContext : DbContext
 {
     /// <summary>
     /// Добваление.
     /// </summary>
-    /// <param name="entity">Сущность.</param>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
+    /// <param name = "entity" > Сущность.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns></returns>
-    Task AddAsync(TEntity entity, CancellationToken cancellationToken);
+    Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken) where TEntity : BaseEntity;
 
     /// <summary>
-    /// Возвращает все сущности <see cref="TEntity"/>.
+    /// Возвращает все сущности <typeparamref name="TEntity"/>.
     /// </summary>
-    /// <returns>Все элементы сущности <see cref="TEntity"/></returns>
-    IQueryable<TEntity> GetAll();
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
+    /// <returns>Все элементы сущности <typeparamref name="TEntity"/></returns>
+    IQueryable<TEntity> GetAll<TEntity>() where TEntity : BaseEntity;
 
     /// <summary>
-    /// Получение сущности <see cref="TEntity"/> по идентификатору.
+    /// Получение сущности <typeparamref name="TEntity"/> по идентификатору.
     /// </summary>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
     /// <param name="id">Идентификатор.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <returns>Сущность <see cref="TEntity"/></returns>
-    Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    /// <returns>Сущность <typeparamref name="TEntity"/></returns>
+    Task<TEntity> GetByIdAsync<TEntity>(Guid id, CancellationToken cancellationToken) where TEntity : BaseEntity;
 
     /// <summary>
-    /// Возвращает сущности <see cref="TEntity"/> согласно условию.
+    /// Возвращает сущности <typeparamref name="TEntity"/> согласно условию.
     /// </summary>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
     /// <param name="predicate">Условие.</param>
     /// <returns></returns>
-    IQueryable<TEntity> GetByPredicate(Expression<Func<TEntity, bool>> predicate);
+    IQueryable<TEntity> GetByPredicate<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : BaseEntity;
 
     /// <summary>
     /// Удаление.
     /// </summary>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
     /// <param name="id">Идентификатор.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns></returns>
-    Task RemoveAsync(Guid id, CancellationToken cancellationToken);
+    Task RemoveAsync<TEntity>(Guid id, CancellationToken cancellationToken) where TEntity : BaseEntity;
 
     /// <summary>
     /// Удаление.
     /// </summary>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
     /// <param name="entity">Сущность.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns></returns>
-    Task RemoveAsync(TEntity entity, CancellationToken cancellationToken);
+    Task RemoveAsync<TEntity>(TEntity entity, CancellationToken cancellationToken) where TEntity : BaseEntity;
 
     /// <summary>
     /// Обновление.
     /// </summary>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
     /// <param name="entity">Сущность.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns></returns>
-    Task UpdateAsync(TEntity entity, CancellationToken cancellationToken);
+    Task UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken) where TEntity : BaseEntity;
 
     /// <summary>
     /// Проверка на существование сущности в репозитории по идентификатору.
     /// </summary>
+    /// <typeparam name="TEntity">Сущность хранимая в репозитории.</typeparam>
     /// <param name="id">Идентификатор.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Вернет true, в случае если сущность будет найдена, иначе false.</returns>
-    Task<bool> IsExistAsync(Guid id, CancellationToken cancellationToken);
+    Task<bool> IsExistAsync<TEntity>(Guid id, CancellationToken cancellationToken) where TEntity : BaseEntity;
 }

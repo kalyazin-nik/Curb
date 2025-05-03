@@ -28,10 +28,10 @@ export default {
   },
   async mounted() {
     try {
-      const token = localStorage.getItem("token");
+      const accessToken = localStorage.getItem("accessToken");
       const response = await axios.get('/api/WeatherForecast', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         }
       });
       this.forecasts = response.data;
