@@ -10,12 +10,14 @@ internal static class MapUserExtensions
     {
         return new User
         {
-            UserId = long.Parse(userRegister.Id),
+            UserId = userRegister.Id is not null ? long.Parse(userRegister.Id) : 0,
             Username = userRegister.Username,
             FirstName = userRegister.FirstName,
             LastName = userRegister.LastName,
+            Email = userRegister.Email,
+            Password = userRegister.Password,
             PhotoUrl = userRegister.PhotoUrl,
-            AuthDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(userRegister.AuthDate)).UtcDateTime,
+            AuthDate = userRegister.AuthDate is not null ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(userRegister.AuthDate)).UtcDateTime : DateTime.UtcNow,
             CreeatedAt = DateTime.UtcNow,
             Session = new Session()
         };
@@ -32,7 +34,16 @@ internal static class MapUserExtensions
         };
     }
 
-    public static Dictionary<string, object?> MapToPropertyValues(this UserRegisterDto userRegister)
+    public static UserDto MapToUserDto(this UserLoginDto userLogin)
+    {
+        return new UserDto
+        {
+            Id = userLogin.Id,
+            Role = UserRole.Companion.ToString()
+        };
+    }
+
+    public static Dictionary<string, object?> MapToPropertyValues(this UserRegisterDto userRegister, string refreshToken, int daysCount, bool forceLogout = false)
     {
         return new Dictionary<string, object?>
         {
@@ -40,7 +51,31 @@ internal static class MapUserExtensions
             { nameof(userRegister.FirstName), userRegister.FirstName },
             { nameof(userRegister.LastName), userRegister.LastName },
             { nameof(userRegister.PhotoUrl), userRegister.PhotoUrl },
-            { nameof(userRegister.AuthDate),  DateTimeOffset.FromUnixTimeSeconds(long.Parse(userRegister.AuthDate)).UtcDateTime }
+            { nameof(userRegister.AuthDate),  userRegister.AuthDate is not null ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(userRegister.AuthDate)).UtcDateTime : DateTime.UtcNow },
+            { nameof(Session.RefreshToken),  refreshToken },
+            { nameof(Session.ExpiryTime), DateTime.UtcNow.AddDays(daysCount) },
+            { nameof(Session.ForceLogout), forceLogout },
+        };
+    }
+
+    public static Dictionary<string, object?> MapToPropertyValues(this UserLoginDto userLogin, string refreshToken, int daysCount, bool forceLogout = false)
+    {
+        return new Dictionary<string, object?>
+        {
+            { nameof(userLogin.AuthDate),  userLogin.AuthDate is not null ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(userLogin.AuthDate)).UtcDateTime : DateTime.UtcNow },
+            { nameof(Session.RefreshToken),  refreshToken },
+            { nameof(Session.ExpiryTime), DateTime.UtcNow.AddDays(daysCount) },
+            { nameof(Session.ForceLogout), forceLogout },
+        };
+    }
+
+    public static UserLoginDto ToUserLoginDto(this User user)
+    {
+        return new UserLoginDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Password = user.Password
         };
     }
 }
