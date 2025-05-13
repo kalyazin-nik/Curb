@@ -26,9 +26,25 @@ public interface IUserService
     /// <summary>
     /// Обновление свойств пользователя.
     /// </summary>
-    /// <param name="userDto">Пользователь.</param>
+    /// <param name="id">Идентификатор пользователя.</param>
     /// <param name="propertyValues">Свойства пользователя в виде ключ - значение, где ключ - название свойства, значение - значение свойства.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Выполненная заадча.</returns>
-    Task UpdateAsync(UserDto userDto, Dictionary<string, object?> propertyValues, CancellationToken cancellationToken);
+    Task UpdateAsync(Guid id, Dictionary<string, object?> propertyValues, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<UserDto?> GetUserByEmail(string email, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<UserLoginDto?> GetUserLogin(string email, CancellationToken cancellationToken);
 }

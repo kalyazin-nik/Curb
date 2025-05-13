@@ -31,6 +31,17 @@ public interface IAuthService
     Task<string> GenerateRefreshToken(CancellationToken cancellationToken);
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessToken"></param>
+    /// <param name="cancellationToken"></param>
+    /// <param name="validateIssuer"></param>
+    /// <param name="validateAudience"></param>
+    /// <param name="validateLifetime"></param>
+    /// <returns></returns>
+    Task<bool> AccessTokenIsValidAsync(string accessToken, CancellationToken cancellationToken, bool validateIssuer = true, bool validateAudience = true, bool validateLifetime = false);
+
+    /// <summary>
     /// Проверка достоверности токена обновления конкретного пользователя.
     /// </summary>
     /// <param name="userDto">Пользователь.</param>

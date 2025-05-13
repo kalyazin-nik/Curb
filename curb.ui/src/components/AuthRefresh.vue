@@ -16,6 +16,7 @@ onMounted(async () => {
       return router.push('/login');
     }
 
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
     const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
     const userId = tokenPayload.userId;
     const role = tokenPayload.role;

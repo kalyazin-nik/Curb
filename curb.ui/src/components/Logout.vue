@@ -17,6 +17,7 @@ onMounted(async () => {
     const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
     const userId = tokenPayload.userId;
     const role = tokenPayload.role;
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
     await axios.post('/api/auth/logout', { refreshToken, id: userId, role });
 
     localStorage.removeItem('redirectPath');
