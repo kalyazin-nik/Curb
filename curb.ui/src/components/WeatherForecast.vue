@@ -29,11 +29,13 @@ export default {
   async mounted() {
     try {
       const accessToken = localStorage.getItem("accessToken");
-      const response = await axios.get('/api/WeatherForecast', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      // const response = await axios.get('/api/WeatherForecast', {
+      //   headers: {
+      //     Authorization: `Bearer ${accessToken}`,
+      //   }
+      // });
+      const response = await axios.get('/api/WeatherForecast');
       this.forecasts = response.data;
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);

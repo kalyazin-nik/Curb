@@ -11,7 +11,7 @@ public class UserRegisterDto
     /// Идентификатор пользователя.
     /// </summary>
     [FromQuery(Name = "id")]
-    public string Id { get; set; } = null!;
+    public string? Id { get; set; } = null!;
 
     /// <summary>
     /// Прозвище.
@@ -32,10 +32,20 @@ public class UserRegisterDto
     public string? LastName { get; set; }
 
     /// <summary>
+    /// Электронная почта.
+    /// </summary>
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Пароль.
+    /// </summary>
+    public string? Password { get; set; }
+
+    /// <summary>
     /// Дата аутентификации.
     /// </summary>
     [FromQuery(Name = "auth_date")]
-    public string AuthDate { get; set; } = null!;
+    public string? AuthDate { get; set; } = null!;
 
     /// <summary>
     /// Url путь к фото.
@@ -47,5 +57,5 @@ public class UserRegisterDto
     /// Хэш всех свойств.
     /// </summary>
     [FromQuery(Name = "hash")]
-    public string Hash { get; set; } = null!;
+    public string? Hash { get; set; } = null!;
 }

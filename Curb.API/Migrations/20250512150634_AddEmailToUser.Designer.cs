@@ -3,6 +3,7 @@ using System;
 using Curb.API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Curb.API.Migrations
 {
     [DbContext(typeof(CurbDbContext))]
-    partial class CurbDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512150634_AddEmailToUser")]
+    partial class AddEmailToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,10 +86,6 @@ namespace Curb.API.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("text")
-                        .HasColumnName("password");
-
                     b.Property<string>("PhotoUrl")
                         .HasColumnType("text")
                         .HasColumnName("photo_url");
@@ -100,8 +99,6 @@ namespace Curb.API.Migrations
                         .HasColumnName("username");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email");
 
                     b.HasIndex("Id");
 
